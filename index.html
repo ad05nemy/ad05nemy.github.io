@@ -325,12 +325,12 @@
         
           
             <p>用C语言粗略写了个验证字符串的代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line"></span><br><span class="line">void main()</span><br><span class="line">&#123;</span><br><span class="line">int shuz;</span><br><span class="line">scanf(&quot;please input password%d&quot;,&amp;shuz);</span><br><span class="line">if (shuz == 123)</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;login sucess!&quot;);</span><br><span class="line">	system(&quot;pause&quot;);</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;Password error!&quot;);</span><br><span class="line">	system(&quot;pause&quot;);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
-<p>可以看到程序判断输入是否为123<br>如果是，则提示Login Success!不是则提示Password error!退出程序<br>打开IDA加载程序<br><img src="//ad05nemy.github.io/2019/04/01/hello-hexo/IDA.jpg" alt="IDA"></p>
-<p>清楚的看到程序的逻辑流程<br>jnz地址处则是判断逻辑的开始,空格跳转到汇编代码查看jnz的内存地址为<br><img src="//ad05nemy.github.io/2019/04/01/hello-hexo/IDA地址.jpg" alt="IDA地址"></p>
-<p>用OD附加进程看看,查找所有字符串<br><img src="//ad05nemy.github.io/2019/04/01/hello-hexo/OD字符串.jpg" alt="OD字符串"></p>
-<p>清楚的看到请输入密码的提示语，双击跳转到汇编语句所在的位置<br><img src="//ad05nemy.github.io/2019/04/01/hello-hexo/字符串位置.jpg" alt="字符串位置"></p>
+<p>可以看到程序判断输入是否为123<br>如果是，则提示Login Success!不是则提示Password error!退出程序<br>打开IDA加载程序<br><img src="/2019/04/01/hello-hexo/IDA.jpg" alt="IDA"></p>
+<p>清楚的看到程序的逻辑流程<br>jnz地址处则是判断逻辑的开始,空格跳转到汇编代码查看jnz的内存地址为<br><img src="/2019/04/01/hello-hexo/IDA地址.jpg" alt="IDA地址"></p>
+<p>用OD附加进程看看,查找所有字符串<br><img src="/2019/04/01/hello-hexo/OD字符串.jpg" alt="OD字符串"></p>
+<p>清楚的看到请输入密码的提示语，双击跳转到汇编语句所在的位置<br><img src="/2019/04/01/hello-hexo/字符串位置.jpg" alt="字符串位置"></p>
 <p>看到提示成功和密码错误的提示语,结合在IDA找到的跳转指令内存地址 004A1019,加上OD内存位置的jnz可以得出00EA4019即是我们在IDA看到jnz跳转指令，为什么00401019变成了00EA1019,<strong>十进制01234换算十六进制分别是ABCDE，所以004A1019变成了00EA1019</strong></p>
-<p>把jnz改成jz重新运行程序<br><img src="//ad05nemy.github.io/2019/04/01/hello-hexo/jz.jpg" alt="jz"></p>
+<p>把jnz改成jz重新运行程序<br><img src="/2019/04/01/hello-hexo/jz.jpg" alt="jz"></p>
 <p>可以看到，随意输入的字符串也能判断成功!</p>
 
           
