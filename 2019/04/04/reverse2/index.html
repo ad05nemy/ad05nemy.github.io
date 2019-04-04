@@ -79,20 +79,20 @@
 
 
 
-<meta name="description" content="结合上篇继续jnz改成jz即可修改程序判断逻辑首先ZF是一个标志位，用来临时记录运算结果,若运算结果为真，则标志位ZF=1,否则ZF=0  JNZ：运算结果不为0则跳转(检查标志位ZF是否等于0,不为0则跳转)JZ：运算结果为0则跳转(检查标志位ZF是否等于1,不为1则跳转)  首先在jnz处下个断点，再运行程序可以看到此时Z标志位为0,把标志位修改为1,再运行程序再次提示login succes">
+<meta name="description" content="结合上篇继续jnz改成jz即可修改程序判断逻辑首先ZF是一个标志位，用来临时记录运算结果,若运算结果为真，则标志位ZF=1,否则ZF=0  JNZ：运算结果不为0则跳转(检查标志位ZF是否等于0,不为0则跳转)JZ：运算结果为0则跳转(检查标志位ZF是否等于1,不为1则跳转)  首先在jnz处下个断点，再运行程序可以看到此时Z标志位为0,把标志位修改为1,再运行程序再次提示login succe">
 <meta name="keywords" content="渗透">
 <meta property="og:type" content="article">
-<meta property="og:title" content="逆向(2)">
+<meta property="og:title" content="逆向笔记(2)">
 <meta property="og:url" content="https://ad05nemy.github.io/2019/04/04/reverse2/index.html">
 <meta property="og:site_name" content="玄天机">
-<meta property="og:description" content="结合上篇继续jnz改成jz即可修改程序判断逻辑首先ZF是一个标志位，用来临时记录运算结果,若运算结果为真，则标志位ZF=1,否则ZF=0  JNZ：运算结果不为0则跳转(检查标志位ZF是否等于0,不为0则跳转)JZ：运算结果为0则跳转(检查标志位ZF是否等于1,不为1则跳转)  首先在jnz处下个断点，再运行程序可以看到此时Z标志位为0,把标志位修改为1,再运行程序再次提示login succes">
+<meta property="og:description" content="结合上篇继续jnz改成jz即可修改程序判断逻辑首先ZF是一个标志位，用来临时记录运算结果,若运算结果为真，则标志位ZF=1,否则ZF=0  JNZ：运算结果不为0则跳转(检查标志位ZF是否等于0,不为0则跳转)JZ：运算结果为0则跳转(检查标志位ZF是否等于1,不为1则跳转)  首先在jnz处下个断点，再运行程序可以看到此时Z标志位为0,把标志位修改为1,再运行程序再次提示login succe">
 <meta property="og:locale" content="zh-Hans">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/04/reverse2/jz.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/04/reverse2/标志位.jpeg">
-<meta property="og:updated_time" content="2019-04-04T10:23:42.758Z">
+<meta property="og:updated_time" content="2019-04-04T10:39:35.754Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="逆向(2)">
-<meta name="twitter:description" content="结合上篇继续jnz改成jz即可修改程序判断逻辑首先ZF是一个标志位，用来临时记录运算结果,若运算结果为真，则标志位ZF=1,否则ZF=0  JNZ：运算结果不为0则跳转(检查标志位ZF是否等于0,不为0则跳转)JZ：运算结果为0则跳转(检查标志位ZF是否等于1,不为1则跳转)  首先在jnz处下个断点，再运行程序可以看到此时Z标志位为0,把标志位修改为1,再运行程序再次提示login succes">
+<meta name="twitter:title" content="逆向笔记(2)">
+<meta name="twitter:description" content="结合上篇继续jnz改成jz即可修改程序判断逻辑首先ZF是一个标志位，用来临时记录运算结果,若运算结果为真，则标志位ZF=1,否则ZF=0  JNZ：运算结果不为0则跳转(检查标志位ZF是否等于0,不为0则跳转)JZ：运算结果为0则跳转(检查标志位ZF是否等于1,不为1则跳转)  首先在jnz处下个断点，再运行程序可以看到此时Z标志位为0,把标志位修改为1,再运行程序再次提示login succe">
 <meta name="twitter:image" content="https://ad05nemy.github.io/2019/04/04/reverse2/jz.jpeg">
 
 
@@ -129,7 +129,7 @@
 
 
 
-  <title>逆向(2) | 玄天机</title>
+  <title>逆向笔记(2) | 玄天机</title>
   
 
 
@@ -263,7 +263,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">逆向(2)</h1>
+          <h1 class="post-title" itemprop="name headline">逆向笔记(2)</h1>
         
 
         <div class="post-meta">
@@ -323,11 +323,12 @@
       
 
       
-        <p>结合上篇继续<br>jnz改成jz即可修改程序判断逻辑<br>首先<strong>ZF</strong>是一个标志位，用来临时记录运算结果,若运算结果为真，则标志位ZF=1,否则ZF=0</p>
+        <a id="more"></a>
+<p>结合上篇继续<br>jnz改成jz即可修改程序判断逻辑<br>首先<strong>ZF</strong>是一个标志位，用来临时记录运算结果,若运算结果为真，则标志位ZF=1,否则ZF=0</p>
 <hr>
 <p>JNZ：运算结果不为0则跳转(检查标志位ZF是否等于0,不为0则跳转)<br>JZ：运算结果为0则跳转(检查标志位ZF是否等于1,不为1则跳转)</p>
 <hr>
-<p>首先在jnz处下个断点，再运行程序<br><img src="/2019/04/04/reverse2/jz.jpeg" alt><br>可以看到此时Z标志位为0,把标志位修改为1,再运行程序<br><img src="/2019/04/04/reverse2/标志位.jpeg" alt><br>再次提示login success!<br>运算为假，所以ZF=0，正常逻辑为jnz判断ZF此时=0，根据jnz不为1则跳转,所以跳转到password error提示语处,反之修改为jz为0则不跳转，顺序执行到login sucess!</p>
+<p>首先在jnz处下个断点，再运行程序<br><img src="/2019/04/04/reverse2/jz.jpeg" alt><br>可以看到此时Z标志位为0,把标志位修改为1,再运行程序<br><img src="/2019/04/04/reverse2/标志位.jpeg" alt><br>再次提示login success!<br>为什么改成jz照样能判断成功,因为正常运算为假，所以ZF=0，正常逻辑为jnz判断ZF此时=0，根据jnz不为1则跳转,所以跳转到password error提示语处,反之修改为jz为0则不跳转，顺序执行到login sucess!</p>
 
       
     </div>
