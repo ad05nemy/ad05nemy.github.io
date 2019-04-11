@@ -341,12 +341,11 @@ $(document).ready(function () {
       }
     },
 
-    sidebar: function (integrator) {
-      if (CONFIG.sidebar.display === 'always') {
+	sidebar: function (integrator) {
+        if (CONFIG.sidebar.display === 'always') {
         NexT.utils.displaySidebar();
       }
       integrator.next();
     }
   };
-
 });

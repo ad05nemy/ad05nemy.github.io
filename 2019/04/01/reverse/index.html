@@ -79,24 +79,22 @@
 
 
 
-<meta name="description" content="用C语言粗略写了个验证字符串的代码如下:123456789101112131415161718#include &amp;lt;stdio.h&amp;gt;#include &amp;lt;stdlib.h&amp;gt;void main()&amp;#123;int shuz;scanf(&amp;quot;please input password%d&amp;quot;,&amp;amp;shuz);if (shuz == 123)&amp;#123;	p">
 <meta name="keywords" content="逆向">
 <meta property="og:type" content="article">
 <meta property="og:title" content="逆向笔记(1)">
 <meta property="og:url" content="https://ad05nemy.github.io/2019/04/01/reverse/index.html">
 <meta property="og:site_name" content="玄天机">
-<meta property="og:description" content="用C语言粗略写了个验证字符串的代码如下:123456789101112131415161718#include &amp;lt;stdio.h&amp;gt;#include &amp;lt;stdlib.h&amp;gt;void main()&amp;#123;int shuz;scanf(&amp;quot;please input password%d&amp;quot;,&amp;amp;shuz);if (shuz == 123)&amp;#123;	p">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ad05nemy.github.io/2019/04/01/reverse/zhaiyao.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/01/reverse/IDA.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/01/reverse/IDA地址.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/01/reverse/OD字符串.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/01/reverse/字符串位置.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/01/reverse/jz.jpeg">
-<meta property="og:updated_time" content="2019-04-11T18:18:41.650Z">
+<meta property="og:updated_time" content="2019-04-11T19:49:38.447Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="逆向笔记(1)">
-<meta name="twitter:description" content="用C语言粗略写了个验证字符串的代码如下:123456789101112131415161718#include &amp;lt;stdio.h&amp;gt;#include &amp;lt;stdlib.h&amp;gt;void main()&amp;#123;int shuz;scanf(&amp;quot;please input password%d&amp;quot;,&amp;amp;shuz);if (shuz == 123)&amp;#123;	p">
-<meta name="twitter:image" content="https://ad05nemy.github.io/2019/04/01/reverse/IDA.jpeg">
+<meta name="twitter:image" content="https://ad05nemy.github.io/2019/04/01/reverse/zhaiyao.jpeg">
 
 
 
@@ -400,8 +398,7 @@
       
 
       
-        <a id="more"></a>
-<p>用C语言粗略写了个验证字符串的代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line"></span><br><span class="line">void main()</span><br><span class="line">&#123;</span><br><span class="line">int shuz;</span><br><span class="line">scanf(&quot;please input password%d&quot;,&amp;shuz);</span><br><span class="line">if (shuz == 123)</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;login sucess!&quot;);</span><br><span class="line">	system(&quot;pause&quot;);</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;Password error!&quot;);</span><br><span class="line">	system(&quot;pause&quot;);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+        <p><img src="/2019/04/01/reverse/zhaiyao.jpeg" alt><br><a id="more"></a><br>用C语言粗略写了个验证字符串的代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;stdlib.h&gt;</span><br><span class="line"></span><br><span class="line">void main()</span><br><span class="line">&#123;</span><br><span class="line">int shuz;</span><br><span class="line">scanf(&quot;please input password%d&quot;,&amp;shuz);</span><br><span class="line">if (shuz == 123)</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;login sucess!&quot;);</span><br><span class="line">	system(&quot;pause&quot;);</span><br><span class="line">&#125;</span><br><span class="line">else</span><br><span class="line">&#123;</span><br><span class="line">	printf(&quot;Password error!&quot;);</span><br><span class="line">	system(&quot;pause&quot;);</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>可以看到程序判断输入是否为123<br>如果是，则提示Login Success!不是则提示Password error!退出程序<br>打开IDA加载程序<br><img src="/2019/04/01/reverse/IDA.jpeg" alt="IDA"></p>
 <p>清楚的看到程序的逻辑流程<br>jnz地址处则是判断逻辑的开始,空格跳转到汇编代码查看jnz的内存地址为<br><img src="/2019/04/01/reverse/IDA地址.jpeg" alt="IDA地址"></p>
 <p>用OD附加进程看看,查找所有字符串<br><img src="/2019/04/01/reverse/OD字符串.jpeg" alt="OD字符串"></p>
@@ -670,14 +667,9 @@
   
 
 
-  
 
 
 
-
-
-  
-  
 
 
 
@@ -713,21 +705,6 @@
   
   
     <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/three/three.min.js"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
   
 
 

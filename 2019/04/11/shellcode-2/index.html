@@ -79,23 +79,21 @@
 
 
 
-<meta name="description" content="实际编写一个例子:123456789#include &amp;quot;stdio.h&amp;quot;#include &amp;quot;string.h&amp;quot;int main()&amp;#123;	char buffer[8];	gets(buffer);	printf(&amp;quot;%s&amp;quot;,buffer);	return 0;&amp;#125; 可以看到我在程序中定义了一个缓冲区长度为8的buffer,把">
 <meta name="keywords" content="shellcode,溢出">
 <meta property="og:type" content="article">
 <meta property="og:title" content="shellcode笔记(2)">
 <meta property="og:url" content="https://ad05nemy.github.io/2019/04/11/shellcode-2/index.html">
 <meta property="og:site_name" content="玄天机">
-<meta property="og:description" content="实际编写一个例子:123456789#include &amp;quot;stdio.h&amp;quot;#include &amp;quot;string.h&amp;quot;int main()&amp;#123;	char buffer[8];	gets(buffer);	printf(&amp;quot;%s&amp;quot;,buffer);	return 0;&amp;#125; 可以看到我在程序中定义了一个缓冲区长度为8的buffer,把">
 <meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ad05nemy.github.io/2019/04/11/shellcode-2/zhaiyao.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/11/shellcode-2/1.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/11/shellcode-2/2.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/11/shellcode-2/4.jpeg">
 <meta property="og:image" content="https://ad05nemy.github.io/2019/04/11/shellcode-2/3.jpeg">
-<meta property="og:updated_time" content="2019-04-11T17:55:27.857Z">
+<meta property="og:updated_time" content="2019-04-11T20:02:02.128Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="shellcode笔记(2)">
-<meta name="twitter:description" content="实际编写一个例子:123456789#include &amp;quot;stdio.h&amp;quot;#include &amp;quot;string.h&amp;quot;int main()&amp;#123;	char buffer[8];	gets(buffer);	printf(&amp;quot;%s&amp;quot;,buffer);	return 0;&amp;#125; 可以看到我在程序中定义了一个缓冲区长度为8的buffer,把">
-<meta name="twitter:image" content="https://ad05nemy.github.io/2019/04/11/shellcode-2/1.jpeg">
+<meta name="twitter:image" content="https://ad05nemy.github.io/2019/04/11/shellcode-2/zhaiyao.jpeg">
 
 
 
@@ -399,8 +397,7 @@
       
 
       
-        <a id="more"></a>
-<p>实际编写一个例子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#include &quot;stdio.h&quot;</span><br><span class="line">#include &quot;string.h&quot;</span><br><span class="line"></span><br><span class="line">int main()&#123;</span><br><span class="line">	char buffer[8];</span><br><span class="line">	gets(buffer);</span><br><span class="line">	printf(&quot;%s&quot;,buffer);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+        <p><img src="/2019/04/11/shellcode-2/zhaiyao.jpeg" alt><br><a id="more"></a><br>实际编写一个例子:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">#include &quot;stdio.h&quot;</span><br><span class="line">#include &quot;string.h&quot;</span><br><span class="line"></span><br><span class="line">int main()&#123;</span><br><span class="line">	char buffer[8];</span><br><span class="line">	gets(buffer);</span><br><span class="line">	printf(&quot;%s&quot;,buffer);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
 <p>可以看到我在程序中定义了一个缓冲区长度为8的buffer,把输入的数据放在buffer里面，然后打印出来,用OD附加看看<br><img src="/2019/04/11/shellcode-2/1.jpeg" alt><br>输入16个a，长度远远大于我定义的8个字节看看会发生什么<br><img src="/2019/04/11/shellcode-2/2.jpeg" alt><br>字符a的ascii码即是61,可以看到，程序暂停了，并报出了访问违规<br>再看看EIP寄存器变成了61616161<br><img src="/2019/04/11/shellcode-2/4.jpeg" alt><br>EIP寄存器存放了下一跳指令的地址，61616161不是一个地址，也不是一个指令，导致了程序的异常终止<br>再看堆栈窗口的数据<br><img src="/2019/04/11/shellcode-2/3.jpeg" alt><br>四个地址全部61占满,我输入了16个a,刚好16个字节的地址大小，此处因为我输入了超出缓存区大小的数据，溢出覆盖了EIP寄存器，如果我输入的是构造好的shellcode,那么我就能执行任意代码，甚至获取一个系统shell</p>
 
       
@@ -665,14 +662,9 @@
   
 
 
-  
 
 
 
-
-
-  
-  
 
 
 
@@ -708,21 +700,6 @@
   
   
     <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/canvas-nest/canvas-nest.min.js"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/three/three.min.js"></script>
-  
-
-  
-  
-    <script type="text/javascript" src="/lib/three/canvas_lines.min.js"></script>
   
 
 
