@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform">
+<meta http-equiv="Cache-Control" content="no-siteapp">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css">
+
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css">
+
+<link href="/css/main.css?v=5.1.4" rel="stylesheet" type="text/css">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon32.ico?v=5.1.4">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon16.ico?v=5.1.4">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=5.1.4" color="#222">
+
+
+
+
+
+  <meta name="keywords" content="shellcode,溢出,">
+
+
+
+
+
+
+
+
+
+
+<meta name="description" content="继续写shellcode第二部分获取kernel32.dll基址">
+<meta name="keywords" content="shellcode,溢出">
+<meta property="og:type" content="article">
+<meta property="og:title" content="shellcode笔记（5）">
+<meta property="og:url" content="https://ad05nemy.github.io/2019/04/12/shellcode-5/index.html">
+<meta property="og:site_name" content="玄天机">
+<meta property="og:description" content="继续写shellcode第二部分获取kernel32.dll基址">
+<meta property="og:locale" content="zh-Hans">
+<meta property="og:image" content="https://ad05nemy.github.io/2019/04/12/shellcode-5/zhaiyao.jpeg">
+<meta property="og:image" content="https://ad05nemy.github.io/2019/04/12/shellcode-5/TEB.jpeg">
+<meta property="og:image" content="https://ad05nemy.github.io/2019/04/12/shellcode-5/liucheng.jpeg">
+<meta property="og:updated_time" content="2019-04-12T13:22:12.725Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="shellcode笔记（5）">
+<meta name="twitter:description" content="继续写shellcode第二部分获取kernel32.dll基址">
+<meta name="twitter:image" content="https://ad05nemy.github.io/2019/04/12/shellcode-5/zhaiyao.jpeg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '5.1.4',
+    sidebar: {"position":"left","display":"post","offset":12,"b2t":true,"scrollpercent":true,"onmobile":false},
+    fancybox: true,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="https://ad05nemy.github.io/2019/04/12/shellcode-5/">
+
+
+
+
+
+  <title>shellcode笔记（5） | 玄天机</title>
+  
+
+
+
+
+
+
+
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta ">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">玄天机</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br>
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br>
+            
+            关于
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-标签">
+          <a href="/tags/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br>
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-分类">
+          <a href="/categories/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br>
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-在线工具">
+          <a href="/sitemap/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-sitemap"></i> <br>
+            
+            在线工具
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br>
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocomplete="off" placeholder="搜索..." spellcheck="false" type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="https://ad05nemy.github.io/2019/04/12/shellcode-5/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="玄天机">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/test.PNG">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="玄天机">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">shellcode笔记（5）</h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-12T18:47:16+08:00">
+                2019-04-12
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category">
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/windows/" itemprop="url" rel="index">
+                    <span itemprop="name">windows</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+              <span class="post-comments-count">
+                <span class="post-meta-divider">|</span>
+                <span class="post-meta-item-icon">
+                  <i class="fa fa-comment-o"></i>
+                </span>
+                <a href="/2019/04/12/shellcode-5/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/04/12/shellcode-5/" itemprop="commentCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><img src="/2019/04/12/shellcode-5/zhaiyao.jpeg" alt></p>
+<blockquote>
+<p>继续写shellcode第二部分<br>获取kernel32.dll基址<br><a id="more"></a><br>这是处理了一部分的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;windows.h&gt;</span><br><span class="line">int entrymain()</span><br><span class="line">&#123;</span><br><span class="line">	char szuser32[] = &#123;&apos;u&apos;,&apos;s&apos;,&apos;e&apos;,&apos;r&apos;,&apos;3&apos;,&apos;2&apos;,&apos;.&apos;,&apos;d&apos;,&apos;l&apos;,&apos;l&apos;,0&#125;;</span><br><span class="line">	char szmessage[] = &#123;&apos;M&apos;,&apos;e&apos;,&apos;s&apos;,&apos;s&apos;,&apos;a&apos;,&apos;g&apos;,&apos;e&apos;,&apos;B&apos;,&apos;o&apos;,&apos;x&apos;,&apos;A&apos;,0&#125;;</span><br><span class="line">	typedef int(WINAPI *FN_MessageBoxA)(</span><br><span class="line">    __in_opt HWND hWnd,</span><br><span class="line">    __in_opt LPCSTR lpText,</span><br><span class="line">    __in_opt LPCSTR lpCaption,</span><br><span class="line">    __in UINT uType);</span><br><span class="line">	FN_MessageBoxA fn_MessageBoxA = (FN_MessageBoxA)GetProcAddress(LoadLibraryA(szuser32),szmessage);</span><br><span class="line">	char he[] = &#123;&apos;h&apos;,&apos;e&apos;,&apos;l&apos;,&apos;l&apos;,&apos;o&apos;,0&#125;;</span><br><span class="line">	char tip[] = &#123;&apos;t&apos;,&apos;i&apos;,&apos;p&apos;,&apos;s&apos;,0&#125;;</span><br><span class="line">	fn_MessageBoxA(NULL,he,tip,MB_OK);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+</blockquote>
+<p>可以看到我用LoadLibraryA和GetProcAddress函数获取了MessaeBoxA的函数地址,但是LoadLibraryA和GetProcAddress同样是一个函数,同样需要动态调用,你会发现，LoadLibraryA已经是加载DLL的函数，本身需要动态调用，那么我们如何实现LoadLibraryA动态调用呢,LoadLibraryA函数存在于kernel32.dll当中，首先需要获取kernel32.dll的地址<br>目前常用的方法是通过<strong>TEB/PEB结构</strong>获取kernel32.dll的基址<br>了解下什么是TEB/PEB结构</p>
+<blockquote>
+<p>TEB(Thread Environment Block，线程环境块)<br>线程环境块中存放着进程中所有线程的各种信息</p>
+</blockquote>
+<p>当exe文件载入内存时,在NT内核系统中fs:[0]指向了TEB结构，TEB(Thread Environment Block)位于用户地址空间，进程中的每个线程都有自己的一个TEB<br><img src="/2019/04/12/shellcode-5/TEB.jpeg" alt><br><strong>从图中我们可以看到NtCurrentTeb() 函数所返回的结构体指针即为 fs:[0x18] 的值，里面的值即为TEB的结构体指针，对比数据窗口即可发现fs:[0]的值即为TEB的起始地址。</strong><br>用windbg随意加载一个文件，用dt命令查看TEB结构体<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; dt nt!_TEB</span><br><span class="line"></span><br><span class="line">ntdll!_TEB</span><br><span class="line"></span><br><span class="line">   +0x000 NtTib            : _NT_TIB</span><br><span class="line"></span><br><span class="line">   +0x01c EnvironmentPointer : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x020 ClientId         : _CLIENT_ID</span><br><span class="line"></span><br><span class="line">   +0x028 ActiveRpcHandle  : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x02c ThreadLocalStoragePointer : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x030 ProcessEnvironmentBlock : Ptr32 _PEB</span><br><span class="line"></span><br><span class="line">   +0x034 LastErrorValue   : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x038 CountOfOwnedCriticalSections : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x03c CsrClientThread  : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x040 Win32ThreadInfo  : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x044 User32Reserved   : [26] Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0ac UserReserved     : [5] Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0c0 WOW32Reserved    : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x0c4 CurrentLocale    : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0c8 FpSoftwareStatusRegister : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0cc SystemReserved1  : [54] Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x1a4 ExceptionCode    : Int4B</span><br><span class="line"></span><br><span class="line">   +0x1a8 ActivationContextStack : _ACTIVATION_CONTEXT_STACK</span><br><span class="line"></span><br><span class="line">   +0x1bc SpareBytes1      : [24] UChar</span><br><span class="line"></span><br><span class="line">   +0x1d4 GdiTebBatch      : _GDI_TEB_BATCH</span><br><span class="line"></span><br><span class="line">   +0x6b4 RealClientId     : _CLIENT_ID</span><br><span class="line"></span><br><span class="line">   +0x6bc GdiCachedProcessHandle : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x6c0 GdiClientPID     : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x6c4 GdiClientTID     : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x6c8 GdiThreadLocalInfo : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x6cc Win32ClientInfo  : [62] Uint4B</span><br><span class="line"></span><br><span class="line">   +0x7c4 glDispatchTable  : [233] Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xb68 glReserved1      : [29] Uint4B</span><br><span class="line"></span><br><span class="line">   +0xbdc glReserved2      : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xbe0 glSectionInfo    : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xbe4 glSection        : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xbe8 glTable          : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xbec glCurrentRC      : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xbf0 glContext        : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xbf4 LastStatusValue  : Uint4B</span><br><span class="line"></span><br><span class="line">   +0xbf8 StaticUnicodeString : _UNICODE_STRING</span><br><span class="line"></span><br><span class="line">   +0xc00 StaticUnicodeBuffer : [261] Uint2B</span><br><span class="line"></span><br><span class="line">   +0xe0c DeallocationStack : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xe10 TlsSlots         : [64] Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xf10 TlsLinks         : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0xf18 Vdm              : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xf1c ReservedForNtRpc : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xf20 DbgSsReserved    : [2] Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xf28 HardErrorsAreDisabled : Uint4B</span><br><span class="line"></span><br><span class="line">   +0xf2c Instrumentation  : [16] Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xf6c WinSockData      : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xf70 GdiBatchCount    : Uint4B</span><br><span class="line"></span><br><span class="line">   +0xf74 InDbgPrint       : UChar</span><br><span class="line"></span><br><span class="line">   +0xf75 FreeStackOnTermination : UChar</span><br><span class="line"></span><br><span class="line">   +0xf76 HasFiberData     : UChar</span><br><span class="line"></span><br><span class="line">   +0xf77 IdealProcessor   : UChar</span><br><span class="line"></span><br><span class="line">   +0xf78 Spare3           : Uint4B</span><br><span class="line"></span><br><span class="line">   +0xf7c ReservedForPerf  : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xf80 ReservedForOle   : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xf84 WaitingOnLoaderLock : Uint4B</span><br><span class="line"></span><br><span class="line">   +0xf88 Wx86Thread       : _Wx86ThreadState</span><br><span class="line"></span><br><span class="line">   +0xf94 TlsExpansionSlots : Ptr32 Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xf98 ImpersonationLocale : Uint4B</span><br><span class="line"></span><br><span class="line">   +0xf9c IsImpersonating  : Uint4B</span><br><span class="line"></span><br><span class="line">   +0xfa0 NlsCache         : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xfa4 pShimData        : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xfa8 HeapVirtualAffinity : Uint4B</span><br><span class="line"></span><br><span class="line">   +0xfac CurrentTransactionHandle : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0xfb0 ActiveFrame      : Ptr32 _TEB_ACTIVE_FRAME</span><br><span class="line"></span><br><span class="line">   +0xfb4 SafeThunkCall    : UChar</span><br><span class="line"></span><br><span class="line">   +0xfb5 BooleanSpare     : [3] UChar</span><br></pre></td></tr></table></figure></p>
+<p>重点关注位于偏移<strong>+0x030</strong>处指向PEB结构体的指针,再查看这个结构体<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; dt nt!_PEB</span><br><span class="line"></span><br><span class="line">ntdll!_PEB</span><br><span class="line"></span><br><span class="line">   +0x000 InheritedAddressSpace : UChar</span><br><span class="line"></span><br><span class="line">   +0x001 ReadImageFileExecOptions : UChar</span><br><span class="line"></span><br><span class="line">   +0x002 BeingDebugged    : UChar</span><br><span class="line"></span><br><span class="line">   +0x003 SpareBool        : UChar</span><br><span class="line"></span><br><span class="line">   +0x004 Mutant           : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x008 ImageBaseAddress : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x00c Ldr              : Ptr32 _PEB_LDR_DATA</span><br><span class="line"></span><br><span class="line">   +0x010 ProcessParameters : Ptr32 _RTL_USER_PROCESS_PARAMETERS</span><br><span class="line"></span><br><span class="line">   +0x014 SubSystemData    : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x018 ProcessHeap      : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x01c FastPebLock      : Ptr32 _RTL_CRITICAL_SECTION</span><br><span class="line"></span><br><span class="line">   +0x020 FastPebLockRoutine : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x024 FastPebUnlockRoutine : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x028 EnvironmentUpdateCount : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x02c KernelCallbackTable : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x030 SystemReserved   : [1] Uint4B</span><br><span class="line"></span><br><span class="line">   +0x034 AtlThunkSListPtr32 : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x038 FreeList         : Ptr32 _PEB_FREE_BLOCK</span><br><span class="line"></span><br><span class="line">   +0x03c TlsExpansionCounter : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x040 TlsBitmap        : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x044 TlsBitmapBits    : [2] Uint4B</span><br><span class="line"></span><br><span class="line">   +0x04c ReadOnlySharedMemoryBase : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x050 ReadOnlySharedMemoryHeap : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x054 ReadOnlyStaticServerData : Ptr32 Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x058 AnsiCodePageData : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x05c OemCodePageData  : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x060 UnicodeCaseTableData : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x064 NumberOfProcessors : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x068 NtGlobalFlag     : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x070 CriticalSectionTimeout : _LARGE_INTEGER</span><br><span class="line"></span><br><span class="line">   +0x078 HeapSegmentReserve : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x07c HeapSegmentCommit : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x080 HeapDeCommitTotalFreeThreshold : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x084 HeapDeCommitFreeBlockThreshold : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x088 NumberOfHeaps    : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x08c MaximumNumberOfHeaps : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x090 ProcessHeaps     : Ptr32 Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x094 GdiSharedHandleTable : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x098 ProcessStarterHelper : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x09c GdiDCAttributeList : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0a0 LoaderLock       : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x0a4 OSMajorVersion   : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0a8 OSMinorVersion   : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0ac OSBuildNumber    : Uint2B</span><br><span class="line"></span><br><span class="line">   +0x0ae OSCSDVersion     : Uint2B</span><br><span class="line"></span><br><span class="line">   +0x0b0 OSPlatformId     : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0b4 ImageSubsystem   : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0b8 ImageSubsystemMajorVersion : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0bc ImageSubsystemMinorVersion : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0c0 ImageProcessAffinityMask : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x0c4 GdiHandleBuffer  : [34] Uint4B</span><br><span class="line"></span><br><span class="line">   +0x14c PostProcessInitRoutine : Ptr32     void </span><br><span class="line"></span><br><span class="line">   +0x150 TlsExpansionBitmap : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x154 TlsExpansionBitmapBits : [32] Uint4B</span><br><span class="line"></span><br><span class="line">   +0x1d4 SessionId        : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x1d8 AppCompatFlags   : _ULARGE_INTEGER</span><br><span class="line"></span><br><span class="line">   +0x1e0 AppCompatFlagsUser : _ULARGE_INTEGER</span><br><span class="line"></span><br><span class="line">   +0x1e8 pShimData        : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x1ec AppCompatInfo    : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x1f0 CSDVersion       : _UNICODE_STRING</span><br><span class="line"></span><br><span class="line">   +0x1f8 ActivationContextData : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x1fc ProcessAssemblyStorageMap : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x200 SystemDefaultActivationContextData : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x204 SystemAssemblyStorageMap : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x208 MinimumStackCommit : Uint4B</span><br></pre></td></tr></table></figure></p>
+<p>重点在于偏移<strong>+0x00c</strong>处指向<strong>_PEB_LDR_DATA</strong>结构的指针,查看这个结构体<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; dt nt!_PEB_LDR_DATA</span><br><span class="line"></span><br><span class="line">ntdll!_PEB_LDR_DATA</span><br><span class="line"></span><br><span class="line">   +0x000 Length           : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x004 Initialized      : UChar</span><br><span class="line"></span><br><span class="line">   +0x008 SsHandle         : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x00c InLoadOrderModuleList : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x014 InMemoryOrderModuleList : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x01c InInitializationOrderModuleList : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x024 EntryInProgress  : Ptr32 Void</span><br></pre></td></tr></table></figure></p>
+<p>这里需要注意三个结构体:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">+0x00c InLoadOrderModuleList : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">+0x014 InMemoryOrderModuleList : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">+0x01c InInitializationOrderModuleList : _LIST_ENTRY</span><br></pre></td></tr></table></figure></p>
+<p>这三个都是_LIST_ENTRY的结构体，都是进程当前已加载模块的链表，只是按照不同的方式排序,这个结构体成员如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; dt nt!_LIST_ENTRY</span><br><span class="line"></span><br><span class="line">ntdll!_LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x000 Flink            : Ptr32 _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x004 Blink            : Ptr32 _LIST_ENTRY</span><br></pre></td></tr></table></figure></p>
+<p>_LIST_ENTRY结构体是双向链表的头结点结构，两个指针分别指向了链表的第一个结点和最后一个节点，这里的双向链表的每一个节点都是一个指向LDR_DATA_TABLE_ENTRY结构体的指针，看一下这个结构的描述:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">0:001&gt; dt nt!_LDR_DATA_TABLE_ENTRY</span><br><span class="line"></span><br><span class="line">ntdll!_LDR_DATA_TABLE_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x000 InLoadOrderLinks : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x008 InMemoryOrderLinks : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x010 InInitializationOrderLinks : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x018 DllBase          : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x01c EntryPoint       : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x020 SizeOfImage      : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x024 FullDllName      : _UNICODE_STRING</span><br><span class="line"></span><br><span class="line">   +0x02c BaseDllName      : _UNICODE_STRING</span><br><span class="line"></span><br><span class="line">   +0x034 Flags            : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x038 LoadCount        : Uint2B</span><br><span class="line"></span><br><span class="line">   +0x03a TlsIndex         : Uint2B</span><br><span class="line"></span><br><span class="line">   +0x03c HashLinks        : _LIST_ENTRY</span><br><span class="line"></span><br><span class="line">   +0x03c SectionPointer   : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x040 CheckSum         : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x044 TimeDateStamp    : Uint4B</span><br><span class="line"></span><br><span class="line">   +0x044 LoadedImports    : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x048 EntryPointActivationContext : Ptr32 Void</span><br><span class="line"></span><br><span class="line">   +0x04c PatchInformation : Ptr32 Void</span><br></pre></td></tr></table></figure></p>
+<p>可以看到<strong>+0x0018</strong>处为DLLBase（DLL基址）<br>偏移8字节，即可得到dll的加载基址<br>流程图(画的略丑)<br><img src="/2019/04/12/shellcode-5/liucheng.jpeg" alt></p>
+<p>用汇编代码得到基址:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">_asm</span><br><span class="line">&#123;</span><br><span class="line">	mov eax,fs:[030h]   //得到peb结构体的地址</span><br><span class="line">	mov eax,[ebx + 0ch] //得到Ldr结构体的地址</span><br><span class="line">	mov eax,[ebx + 014c] //得到ldr.InMemoryOrderModuleList.Flink 第二个模块，当前进程</span><br><span class="line">	mov eax,[ebx]   //得到第一个模块地址 程序本身</span><br><span class="line">	mov eax,[ebx]   //得到第二个模块地址 ntdll.dll</span><br><span class="line">	mov eax,[ebx+0x10]  //得到第三个模块地址（kernel32模块的dllbase)</span><br><span class="line">	ret</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<blockquote>
+<p>DLLBase偏移位于0x018<br>第二个模块偏移0x008<br>所以第三个模块偏移于0x10</p>
+</blockquote>
+
+      
+    </div>
+    
+    
+    
+
+    
+
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/shellcode/" rel="tag"># shellcode</a>
+          
+            <a href="/tags/溢出/" rel="tag"># 溢出</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/04/12/shellcode-4/" rel="next" title="shellcode笔记(4)">
+                <i class="fa fa-chevron-left"></i> shellcode笔记(4)
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/04/12/shellcode-6/" rel="prev" title="shellcode笔记(6)">
+                shellcode笔记(6) <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+
+  
+    <div class="comments" id="comments">
+    </div>
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    
+    <div class="sidebar-inner">
+
+      
+
+      
+
+      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <img class="site-author-image" itemprop="image" src="/images/test.PNG" alt="玄天机">
+            
+              <p class="site-author-name" itemprop="name">玄天机</p>
+              <p class="site-description motion-element" itemprop="description">So Wait...</p>
+          </div>
+
+          <nav class="site-state motion-element">
+
+            
+              <div class="site-state-item site-state-posts">
+              
+                <a href="/archives">
+              
+                  <span class="site-state-item-count">8</span>
+                  <span class="site-state-item-name">日志</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-categories">
+                <a href="/categories/index.html">
+                  <span class="site-state-item-count">1</span>
+                  <span class="site-state-item-name">分类</span>
+                </a>
+              </div>
+            
+
+            
+              
+              
+              <div class="site-state-item site-state-tags">
+                <a href="/tags/index.html">
+                  <span class="site-state-item-count">3</span>
+                  <span class="site-state-item-name">标签</span>
+                </a>
+              </div>
+            
+
+          </nav>
+
+          
+
+          
+
+          
+          
+
+          
+          
+            <div class="links-of-blogroll motion-element links-of-blogroll-block">
+              <div class="links-of-blogroll-title">
+                <i class="fa  fa-fw fa-link"></i>
+                友情链接
+              </div>
+              <ul class="links-of-blogroll-list">
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="http://www.secist.com" title="即刻安全" target="_blank">即刻安全</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://phpinfo.me" title="PHPINFO" target="_blank">PHPINFO</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.ohlinge.cn" title="0h1in9es" target="_blank">0h1in9es</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.leavesongs.com" title="phithon" target="_blank">phithon</a>
+                  </li>
+                
+                  <li class="links-of-blogroll-item">
+                    <a href="https://www.jisec.com" title="极安全" target="_blank">极安全</a>
+                  </li>
+                
+              </ul>
+            </div>
+          
+
+          
+
+        </div>
+      </section>
+
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+            <span id="scrollpercent"><span>0</span>%</span>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">玄天机</span>
+
+  
+</div>
+
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+  
+
+  
+  
+    <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.4"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.4"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.4"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+  <script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+  <script src="//unpkg.com/valine/dist/Valine.min.js"></script>
+  
+  <script type="text/javascript">
+    var GUEST = ['nick','mail','link'];
+    var guest = 'nick,mail,link';
+    guest = guest.split(',').filter(item=>{
+      return GUEST.indexOf(item)>-1;
+    });
+    new Valine({
+        el: '#comments' ,
+        verify: false,
+        notify: false,
+        appId: '8LvClHjravKdmp1ITvHqRIG2-gzGzoHsz',
+        appKey: 'BxV3xStkdph3gmLhYYAbxXqC',
+        placeholder: '说点什么',
+        avatar:'mm',
+        guest_info:guest,
+        pageSize:'10' || 10,
+    });
+  </script>
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    var isXml = true;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length === 0) {
+      search_path = "search.xml";
+    } else if (/json$/i.test(search_path)) {
+      isXml = false;
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    var onPopupClose = function (e) {
+      $('.popup').hide();
+      $('#local-search-input').val('');
+      $('.search-result-list').remove();
+      $('#no-result').remove();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    }
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.search-popup-overlay').click(onPopupClose);
+      $('.popup').toggle();
+      var $localSearchInput = $('#local-search-input');
+      $localSearchInput.attr("autocapitalize", "none");
+      $localSearchInput.attr("autocorrect", "off");
+      $localSearchInput.focus();
+    }
+
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+
+      // start loading animation
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay">' +
+          '<div id="search-loading-icon">' +
+          '<i class="fa fa-spinner fa-pulse fa-5x fa-fw"></i>' +
+          '</div>' +
+          '</div>')
+        .css('overflow', 'hidden');
+      $("#search-loading-icon").css('margin', '20% auto 0 auto').css('text-align', 'center');
+
+      $.ajax({
+        url: path,
+        dataType: isXml ? "xml" : "json",
+        async: true,
+        success: function(res) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = isXml ? $("entry", res).map(function() {
+            return {
+              title: $("title", this).text(),
+              content: $("content",this).text(),
+              url: $("url" , this).text()
+            };
+          }).get() : res;
+          var input = document.getElementById(search_id);
+          var resultContent = document.getElementById(content_id);
+          var inputEventFunction = function() {
+            var searchText = input.value.trim().toLowerCase();
+            var keywords = searchText.split(/[\s\-]+/);
+            if (keywords.length > 1) {
+              keywords.push(searchText);
+            }
+            var resultItems = [];
+            if (searchText.length > 0) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var hitCount = 0;
+                var searchTextCount = 0;
+                var title = data.title.trim();
+                var titleInLowerCase = title.toLowerCase();
+                var content = data.content.trim().replace(/<[^>]+>/g,"");
+                var contentInLowerCase = content.toLowerCase();
+                var articleUrl = decodeURIComponent(data.url);
+                var indexOfTitle = [];
+                var indexOfContent = [];
+                // only match articles with not empty titles
+                if(title != '') {
+                  keywords.forEach(function(keyword) {
+                    function getIndexByWord(word, text, caseSensitive) {
+                      var wordLen = word.length;
+                      if (wordLen === 0) {
+                        return [];
+                      }
+                      var startPosition = 0, position = [], index = [];
+                      if (!caseSensitive) {
+                        text = text.toLowerCase();
+                        word = word.toLowerCase();
+                      }
+                      while ((position = text.indexOf(word, startPosition)) > -1) {
+                        index.push({position: position, word: word});
+                        startPosition = position + wordLen;
+                      }
+                      return index;
+                    }
+
+                    indexOfTitle = indexOfTitle.concat(getIndexByWord(keyword, titleInLowerCase, false));
+                    indexOfContent = indexOfContent.concat(getIndexByWord(keyword, contentInLowerCase, false));
+                  });
+                  if (indexOfTitle.length > 0 || indexOfContent.length > 0) {
+                    isMatch = true;
+                    hitCount = indexOfTitle.length + indexOfContent.length;
+                  }
+                }
+
+                // show search results
+
+                if (isMatch) {
+                  // sort index by position of keyword
+
+                  [indexOfTitle, indexOfContent].forEach(function (index) {
+                    index.sort(function (itemLeft, itemRight) {
+                      if (itemRight.position !== itemLeft.position) {
+                        return itemRight.position - itemLeft.position;
+                      } else {
+                        return itemLeft.word.length - itemRight.word.length;
+                      }
+                    });
+                  });
+
+                  // merge hits into slices
+
+                  function mergeIntoSlice(text, start, end, index) {
+                    var item = index[index.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    var hits = [];
+                    var searchTextCountInSlice = 0;
+                    while (position + word.length <= end && index.length != 0) {
+                      if (word === searchText) {
+                        searchTextCountInSlice++;
+                      }
+                      hits.push({position: position, length: word.length});
+                      var wordEnd = position + word.length;
+
+                      // move to next position of hit
+
+                      index.pop();
+                      while (index.length != 0) {
+                        item = index[index.length - 1];
+                        position = item.position;
+                        word = item.word;
+                        if (wordEnd > position) {
+                          index.pop();
+                        } else {
+                          break;
+                        }
+                      }
+                    }
+                    searchTextCount += searchTextCountInSlice;
+                    return {
+                      hits: hits,
+                      start: start,
+                      end: end,
+                      searchTextCount: searchTextCountInSlice
+                    };
+                  }
+
+                  var slicesOfTitle = [];
+                  if (indexOfTitle.length != 0) {
+                    slicesOfTitle.push(mergeIntoSlice(title, 0, title.length, indexOfTitle));
+                  }
+
+                  var slicesOfContent = [];
+                  while (indexOfContent.length != 0) {
+                    var item = indexOfContent[indexOfContent.length - 1];
+                    var position = item.position;
+                    var word = item.word;
+                    // cut out 100 characters
+                    var start = position - 20;
+                    var end = position + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if (end < position + word.length) {
+                      end = position + word.length;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    slicesOfContent.push(mergeIntoSlice(content, start, end, indexOfContent));
+                  }
+
+                  // sort slices in content by search text's count and hits' count
+
+                  slicesOfContent.sort(function (sliceLeft, sliceRight) {
+                    if (sliceLeft.searchTextCount !== sliceRight.searchTextCount) {
+                      return sliceRight.searchTextCount - sliceLeft.searchTextCount;
+                    } else if (sliceLeft.hits.length !== sliceRight.hits.length) {
+                      return sliceRight.hits.length - sliceLeft.hits.length;
+                    } else {
+                      return sliceLeft.start - sliceRight.start;
+                    }
+                  });
+
+                  // select top N slices in content
+
+                  var upperBound = parseInt('1');
+                  if (upperBound >= 0) {
+                    slicesOfContent = slicesOfContent.slice(0, upperBound);
+                  }
+
+                  // highlight title and content
+
+                  function highlightKeyword(text, slice) {
+                    var result = '';
+                    var prevEnd = slice.start;
+                    slice.hits.forEach(function (hit) {
+                      result += text.substring(prevEnd, hit.position);
+                      var end = hit.position + hit.length;
+                      result += '<b class="search-keyword">' + text.substring(hit.position, end) + '</b>';
+                      prevEnd = end;
+                    });
+                    result += text.substring(prevEnd, slice.end);
+                    return result;
+                  }
+
+                  var resultItem = '';
+
+                  if (slicesOfTitle.length != 0) {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + highlightKeyword(title, slicesOfTitle[0]) + "</a>";
+                  } else {
+                    resultItem += "<li><a href='" + articleUrl + "' class='search-result-title'>" + title + "</a>";
+                  }
+
+                  slicesOfContent.forEach(function (slice) {
+                    resultItem += "<a href='" + articleUrl + "'>" +
+                      "<p class=\"search-result\">" + highlightKeyword(content, slice) +
+                      "...</p>" + "</a>";
+                  });
+
+                  resultItem += "</li>";
+                  resultItems.push({
+                    item: resultItem,
+                    searchTextCount: searchTextCount,
+                    hitCount: hitCount,
+                    id: resultItems.length
+                  });
+                }
+              })
+            };
+            if (keywords.length === 1 && keywords[0] === "") {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>'
+            } else if (resultItems.length === 0) {
+              resultContent.innerHTML = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>'
+            } else {
+              resultItems.sort(function (resultLeft, resultRight) {
+                if (resultLeft.searchTextCount !== resultRight.searchTextCount) {
+                  return resultRight.searchTextCount - resultLeft.searchTextCount;
+                } else if (resultLeft.hitCount !== resultRight.hitCount) {
+                  return resultRight.hitCount - resultLeft.hitCount;
+                } else {
+                  return resultRight.id - resultLeft.id;
+                }
+              });
+              var searchResultList = '<ul class=\"search-result-list\">';
+              resultItems.forEach(function (result) {
+                searchResultList += result.item;
+              })
+              searchResultList += "</ul>";
+              resultContent.innerHTML = searchResultList;
+            }
+          }
+
+          if ('auto' === 'auto') {
+            input.addEventListener('input', inputEventFunction);
+          } else {
+            $('.search-icon').click(inputEventFunction);
+            input.addEventListener('keypress', function (event) {
+              if (event.keyCode === 13) {
+                inputEventFunction();
+              }
+            });
+          }
+
+          // remove loading animation
+          $(".local-search-pop-overlay").remove();
+          $('body').css('overflow', '');
+
+          proceedsearch();
+        }
+      });
+    }
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched === false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(onPopupClose);
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+    $(document).on('keyup', function (event) {
+      var shouldDismissSearchPopup = event.which === 27 &&
+        $('.search-popup').is(':visible');
+      if (shouldDismissSearchPopup) {
+        onPopupClose();
+      }
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  
+
+  
+
+  
+
+  
+
+<script src="/live2dw/lib/L2Dwidget.min.js?bd2294fafea3389ee458f1d9be5a2157"></script><script>L2Dwidget.init({"pluginRootPath":"live2dw/","pluginJsPath":"lib/","pluginModelPath":"assets/","tagMode":false,"debug":false,"model":{"jsonPath":"/live2dw/assets/wanko.model.json"},"display":{"position":"left","width":150,"height":300},"mobile":{"show":true},"log":false});</script></body>
+</html>

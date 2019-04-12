@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="逆向,">
+  <meta name="keywords" content="shellcode,溢出,">
 
 
 
@@ -79,19 +79,21 @@
 
 
 
-<meta name="keywords" content="逆向">
+<meta name="description" content="通过得到的kernel32.dll基址查找GetProcAddres地址">
+<meta name="keywords" content="shellcode,溢出">
 <meta property="og:type" content="article">
-<meta property="og:title" content="逆向笔记(2)">
-<meta property="og:url" content="https://ad05nemy.github.io/2019/04/04/reverse2/index.html">
+<meta property="og:title" content="shellcode笔记(6)">
+<meta property="og:url" content="https://ad05nemy.github.io/2019/04/12/shellcode-6/index.html">
 <meta property="og:site_name" content="玄天机">
+<meta property="og:description" content="通过得到的kernel32.dll基址查找GetProcAddres地址">
 <meta property="og:locale" content="zh-Hans">
-<meta property="og:image" content="https://ad05nemy.github.io/2019/04/04/reverse2/zhaiyao.jpeg">
-<meta property="og:image" content="https://ad05nemy.github.io/2019/04/04/reverse2/jz.jpeg">
-<meta property="og:image" content="https://ad05nemy.github.io/2019/04/04/reverse2/标志位.jpeg">
-<meta property="og:updated_time" content="2019-04-11T19:53:44.081Z">
+<meta property="og:image" content="https://ad05nemy.github.io/2019/04/12/shellcode-6/zhaiyao.jpeg">
+<meta property="og:image" content="https://ad05nemy.github.io/2019/04/12/shellcode-6/qubie.jpeg">
+<meta property="og:updated_time" content="2019-04-12T14:24:11.119Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="逆向笔记(2)">
-<meta name="twitter:image" content="https://ad05nemy.github.io/2019/04/04/reverse2/zhaiyao.jpeg">
+<meta name="twitter:title" content="shellcode笔记(6)">
+<meta name="twitter:description" content="通过得到的kernel32.dll基址查找GetProcAddres地址">
+<meta name="twitter:image" content="https://ad05nemy.github.io/2019/04/12/shellcode-6/zhaiyao.jpeg">
 
 
 
@@ -121,13 +123,13 @@
 
 
 
-  <link rel="canonical" href="https://ad05nemy.github.io/2019/04/04/reverse2/">
+  <link rel="canonical" href="https://ad05nemy.github.io/2019/04/12/shellcode-6/">
 
 
 
 
 
-  <title>逆向笔记(2) | 玄天机</title>
+  <title>shellcode笔记(6) | 玄天机</title>
   
 
 
@@ -296,7 +298,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="https://ad05nemy.github.io/2019/04/04/reverse2/">
+    <link itemprop="mainEntityOfPage" href="https://ad05nemy.github.io/2019/04/12/shellcode-6/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="玄天机">
@@ -313,7 +315,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">逆向笔记(2)</h1>
+          <h1 class="post-title" itemprop="name headline">shellcode笔记(6)</h1>
         
 
         <div class="post-meta">
@@ -325,8 +327,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-04T17:37:56+08:00">
-                2019-04-04
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2019-04-12T21:22:09+08:00">
+                2019-04-12
               </time>
             
 
@@ -366,8 +368,8 @@
                 <span class="post-meta-item-icon">
                   <i class="fa fa-comment-o"></i>
                 </span>
-                <a href="/2019/04/04/reverse2/#comments" itemprop="discussionUrl">
-                  <span class="post-comments-count valine-comment-count" data-xid="/2019/04/04/reverse2/" itemprop="commentCount"></span>
+                <a href="/2019/04/12/shellcode-6/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count valine-comment-count" data-xid="/2019/04/12/shellcode-6/" itemprop="commentCount"></span>
                 </a>
               </span>
             
@@ -395,12 +397,25 @@
       
 
       
-        <p><img src="/2019/04/04/reverse2/zhaiyao.jpeg" alt><br><a id="more"></a></p>
-<p>结合上篇继续<br>jnz改成jz即可修改程序判断逻辑<br>首先<strong>ZF</strong>是一个标志位，用来临时记录运算结果,若运算结果为真，则标志位ZF=1,否则ZF=0</p>
-<hr>
-<p>JNZ：运算结果不为0则跳转(检查标志位ZF是否等于0,不为0则跳转)<br>JZ：运算结果为0则跳转(检查标志位ZF是否等于1,不为1则跳转)</p>
-<hr>
-<p>首先在jnz处下个断点，再运行程序<br><img src="/2019/04/04/reverse2/jz.jpeg" alt><br>可以看到此时Z标志位为0,把标志位修改为1,再运行程序<br><img src="/2019/04/04/reverse2/标志位.jpeg" alt><br>再次提示login success!<br>为什么改成jz照样能判断成功,因为正常运算为假，所以ZF=0，正常逻辑为jnz判断ZF此时=0，根据jnz不为1则跳转,所以跳转到password error提示语处,反之修改为jz为0则不跳转，顺序执行到login sucess!</p>
+        <p><img src="/2019/04/12/shellcode-6/zhaiyao.jpeg" alt></p>
+<blockquote>
+<p>通过得到的kernel32.dll基址查找GetProcAddres地址</p>
+</blockquote>
+<a id="more"></a>
+<p>得到了kernel32的基地址，接下来哟调用其它函数就需要得到GetProcAddress函数的地址，刚好这个函数就存在于kernel32当中<br>大概流程如下:</p>
+<blockquote>
+</blockquote>
+<ol>
+<li>从kernel32.dll的加载基址处找到PE头(kernel32本身也是一个PE文件)</li>
+<li>从PE头处找到函数导出表的指针</li>
+<li>从函数导出表找到存储导出函数偏移地址(RVA)的列表 //AddressOfFunction</li>
+<li>从函数导出表找到存储导出函数函数名的列表 //AddressOfNames</li>
+<li>从函数名称列表中找到对应的序号 //AddressOfNameOrdinals</li>
+<li>通过序号在RVA得到函数地址</li>
+</ol>
+<p>用C语言实现<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br></pre></td><td class="code"><pre><span class="line">FARPROC getProcAddress(HMODULE hModuleBase)</span><br><span class="line">&#123;</span><br><span class="line">FARPROC pRet = NULL; //存储返回地址</span><br><span class="line">PIMAGE_DOS_HEADER lpDosHeader; //PE头</span><br><span class="line">PIMAGE_NT_HEADERS32 lpNtHeaders; </span><br><span class="line">PIMAGE_EXPORT_DIRECTORY lpExports; //导出表</span><br><span class="line">PWORD lpwOrd;</span><br><span class="line">PDWORD lpdwFunName; //存储函数名</span><br><span class="line">PDWORD lpdwFunAddr; //存储RVA</span><br><span class="line">DWORD dwLoop; //循环计数</span><br><span class="line">lpDosHeader = (PIMAGE_DOS_HEADER)hModuleBase; //获得DOS头的基址</span><br><span class="line">lpNtHeaders = (PIMAGE_NT_HEADERS)((DWORD)hModuleBase + lpDosHeader-&gt;e_lfanew); //函数导出表的指针</span><br><span class="line"></span><br><span class="line">if (!lpNtHeaders-&gt;OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size) //得到函数导出表的大小</span><br><span class="line">&#123;</span><br><span class="line">	return pRet;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if (!lpNtHeaders-&gt;OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress)  //得到RVA列表</span><br><span class="line">&#123;</span><br><span class="line">	return pRet;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lpExports = (PIMAGE_EXPORT_DIRECTORY)((DWORD)hModuleBase + (DWORD)lpNtHeaders-&gt;OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress); //得到函数导出表</span><br><span class="line"></span><br><span class="line">if (!lpExports-&gt;NumberOfNames) //得到函数名列表</span><br><span class="line">&#123;</span><br><span class="line">	return pRet;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lpdwFunName = (PDWORD)((DWORD)hModuleBase + (DWORD)lpExports-&gt;AddressOfNames); //赋值函数名列表</span><br><span class="line">lpwOrd = (PWORD)((DWORD)hModuleBase + (DWORD)lpExports-&gt;AddressOfNameOrdinals); //赋值序号表</span><br><span class="line">lpdwFunAddr = (PDWORD) ((DWORD)hModuleBase + (DWORD)lpExports-&gt;AddressOfFunctions); //复制RVA表</span><br><span class="line"></span><br><span class="line">for (dwLoop = 0; dwLoop &lt;= lpExports-&gt;NumberOfNames - 1; dwLoop++)</span><br><span class="line">&#123;</span><br><span class="line">	char *pFunName = (char*)(lpdwFunName[dwLoop] + (DWORD)hModuleBase); //循环查找GetProcAddress函数名的地址</span><br><span class="line">	if (pFunName[0] == &apos;G&apos; &amp;&amp;</span><br><span class="line">	    pFunName[1] == &apos;e&apos; &amp;&amp;</span><br><span class="line">	    pFunName[2] == &apos;t&apos; &amp;&amp;</span><br><span class="line">	    pFunName[3] == &apos;P&apos; &amp;&amp;</span><br><span class="line">	    pFunName[4] == &apos;r&apos; &amp;&amp;</span><br><span class="line">	    pFunName[5] == &apos;o&apos; &amp;&amp;</span><br><span class="line">	    pFunName[6] == &apos;c&apos; &amp;&amp;</span><br><span class="line">	    pFunName[7] == &apos;A&apos; &amp;&amp;</span><br><span class="line">	    pFunName[8] == &apos;d&apos; &amp;&amp;</span><br><span class="line">	    pFunName[9] == &apos;d&apos; &amp;&amp;</span><br><span class="line">	    pFunName[10] == &apos;r&apos; &amp;&amp;</span><br><span class="line">	    pFunName[11] == &apos;e&apos; &amp;&amp;</span><br><span class="line">	    pFunName[12] == &apos;s&apos; &amp;&amp;</span><br><span class="line">	    pFunName[13] == &apos;s&apos; )</span><br><span class="line">	&#123;</span><br><span class="line">	    pRet = (FARPROC)(lpdwFunAddr[lpwOrd[dwLoop]] + (DWORD)hModuleBase); //找到之后返回地址到pRet</span><br><span class="line">	    break;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line">	return pRet;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>最后写一个程序来测试一下<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br></pre></td><td class="code"><pre><span class="line">#include &lt;stdio.h&gt;</span><br><span class="line">#include &lt;windows.h&gt;</span><br><span class="line"></span><br><span class="line">FARPROC getProcAddress(HMODULE hModuleBase);</span><br><span class="line">DWORD getKernel32();</span><br><span class="line">int main()</span><br><span class="line">&#123;</span><br><span class="line">	typedef FARPROC(WINAPI *FN_GetProcAddress) (</span><br><span class="line">    __in HMODULE hModule,</span><br><span class="line">    __in LPCSTR lpProcName</span><br><span class="line">    );</span><br><span class="line">	FN_GetProcAddress fn_GetProcAddress = (FN_GetProcAddress)getProcAddress((HMODULE)getKernel32());</span><br><span class="line">	printf(&quot;0x%x\n&quot;,fn_GetProcAddress);</span><br><span class="line">	printf(&quot;0x%x&quot;,GetProcAddress(LoadLibraryA(&quot;kernel32.dll&quot;),&quot;GetProcAddress&quot;));</span><br><span class="line">	system(&quot;pause&quot;);</span><br><span class="line">	return 0;</span><br><span class="line">&#125;</span><br><span class="line">_declspec(naked) DWORD getKernel32()</span><br><span class="line">&#123;</span><br><span class="line">	_asm</span><br><span class="line">	&#123;</span><br><span class="line">		mov  eax, fs:[030h]//读取PEB进程环境块</span><br><span class="line">		mov  eax, [eax + 0ch]//跳转到PEB环境块的0xc处读取Ldr指针</span><br><span class="line">		mov  eax, [eax + 14h]//跳转到0x14偏移处读取InMemoryOrderModuleList字段</span><br><span class="line">		mov  eax, [eax]</span><br><span class="line">		mov  eax, [eax]</span><br><span class="line">		mov eax, [eax + 10h]</span><br><span class="line">		ret</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">FARPROC getProcAddress(HMODULE hModuleBase)</span><br><span class="line">&#123;</span><br><span class="line">FARPROC pRet = NULL;</span><br><span class="line">PIMAGE_DOS_HEADER lpDosHeader;</span><br><span class="line">PIMAGE_NT_HEADERS32 lpNtHeaders;</span><br><span class="line">PIMAGE_EXPORT_DIRECTORY lpExports;</span><br><span class="line">PWORD lpwOrd;</span><br><span class="line">PDWORD lpdwFunName;</span><br><span class="line">PDWORD lpdwFunAddr;</span><br><span class="line">DWORD dwLoop;</span><br><span class="line"></span><br><span class="line">lpDosHeader = (PIMAGE_DOS_HEADER)hModuleBase;</span><br><span class="line">lpNtHeaders = (PIMAGE_NT_HEADERS)((DWORD)hModuleBase + lpDosHeader-&gt;e_lfanew);</span><br><span class="line"></span><br><span class="line">if (!lpNtHeaders-&gt;OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].Size)</span><br><span class="line">&#123;</span><br><span class="line">	return pRet;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">if (!lpNtHeaders-&gt;OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress)</span><br><span class="line">&#123;</span><br><span class="line">	return pRet;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lpExports = (PIMAGE_EXPORT_DIRECTORY)((DWORD)hModuleBase + (DWORD)lpNtHeaders-&gt;OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress);</span><br><span class="line"></span><br><span class="line">if (!lpExports-&gt;NumberOfNames)</span><br><span class="line">&#123;</span><br><span class="line">	return pRet;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">lpdwFunName = (PDWORD)((DWORD)hModuleBase + (DWORD)lpExports-&gt;AddressOfNames);</span><br><span class="line">lpwOrd = (PWORD)((DWORD)hModuleBase + (DWORD)lpExports-&gt;AddressOfNameOrdinals);</span><br><span class="line">lpdwFunAddr = (PDWORD) ((DWORD)hModuleBase + (DWORD)lpExports-&gt;AddressOfFunctions);</span><br><span class="line"></span><br><span class="line">for (dwLoop = 0; dwLoop &lt;= lpExports-&gt;NumberOfNames - 1; dwLoop++)</span><br><span class="line">&#123;</span><br><span class="line">	char *pFunName = (char*)(lpdwFunName[dwLoop] + (DWORD)hModuleBase);</span><br><span class="line">	if (pFunName[0] == &apos;G&apos; &amp;&amp;</span><br><span class="line">	    pFunName[1] == &apos;e&apos; &amp;&amp;</span><br><span class="line">	    pFunName[2] == &apos;t&apos; &amp;&amp;</span><br><span class="line">	    pFunName[3] == &apos;P&apos; &amp;&amp;</span><br><span class="line">	    pFunName[4] == &apos;r&apos; &amp;&amp;</span><br><span class="line">	    pFunName[5] == &apos;o&apos; &amp;&amp;</span><br><span class="line">	    pFunName[6] == &apos;c&apos; &amp;&amp;</span><br><span class="line">	    pFunName[7] == &apos;A&apos; &amp;&amp;</span><br><span class="line">	    pFunName[8] == &apos;d&apos; &amp;&amp;</span><br><span class="line">	    pFunName[9] == &apos;d&apos; &amp;&amp;</span><br><span class="line">	    pFunName[10] == &apos;r&apos; &amp;&amp;</span><br><span class="line">	    pFunName[11] == &apos;e&apos; &amp;&amp;</span><br><span class="line">	    pFunName[12] == &apos;s&apos; &amp;&amp;</span><br><span class="line">	    pFunName[13] == &apos;s&apos; )</span><br><span class="line">	&#123;</span><br><span class="line">	    pRet = (FARPROC)(lpdwFunAddr[lpwOrd[dwLoop]] + (DWORD)hModuleBase);</span><br><span class="line">	    break;</span><br><span class="line">        &#125;</span><br><span class="line">&#125;</span><br><span class="line">	return pRet;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<p>运行一下，看看通过动态获取的GetProcAddress函数地址和编译器直接调用的GetProcAddress函数地址有没有区别<br><img src="/2019/04/12/shellcode-6/qubie.jpeg" alt><br>可以看到地址是一样的，说明动态函数调用是成功的</p>
 
       
     </div>
@@ -418,7 +433,9 @@
       
         <div class="post-tags">
           
-            <a href="/tags/逆向/" rel="tag"># 逆向</a>
+            <a href="/tags/shellcode/" rel="tag"># shellcode</a>
+          
+            <a href="/tags/溢出/" rel="tag"># 溢出</a>
           
         </div>
       
@@ -431,8 +448,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2019/04/01/reverse/" rel="next" title="逆向笔记(1)">
-                <i class="fa fa-chevron-left"></i> 逆向笔记(1)
+              <a href="/2019/04/12/shellcode-5/" rel="next" title="shellcode笔记（5）">
+                <i class="fa fa-chevron-left"></i> shellcode笔记（5）
               </a>
             
           </div>
@@ -440,10 +457,6 @@
           <span class="post-nav-divider"></span>
 
           <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2019/04/07/shellcode-1/" rel="prev" title="shellcode笔记(1)">
-                shellcode笔记(1) <i class="fa fa-chevron-right"></i>
-              </a>
             
           </div>
         </div>
