@@ -1,6 +1,30 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title><![CDATA[shellcode笔记(4)]]></title>
+    <url>%2F2019%2F04%2F12%2Fshellcode-4%2F</url>
+    <content type="text"><![CDATA[开始编写shellcode新建一个C语言控制台项目，首先把GS选项关闭写一段简单的代码12345678#include &lt;stdio.h&gt;#include &lt;windows.h&gt;int entrymain()&#123; MessageBoxA(NULL,&quot;hello&quot;,&quot;tips&quot;,MB_OK); return 0;&#125; 代码只是弹出了一个消息框，并没有什么作用，现在用shellcode的写法改编首先要杜绝字符串的直接引用123456789#include &lt;stdio.h&gt;#include &lt;windows.h&gt;int entrymain()&#123; char he[] = &#123;&apos;h&apos;,&apos;e&apos;,&apos;l&apos;,&apos;l&apos;,&apos;o&apos;,0&#125;; char tip[] = &#123;&apos;t&apos;,&apos;i&apos;,&apos;p&apos;,&apos;s&apos;,0&#125;; MessageBoxA(NULL,he,tip,MB_OK); return 0;&#125; 然后是函数的动态调用首先需要重新定义该函数，右键转到定义,复制函数原型用typedef定义一个指针12345typedef int(WINAPI *FN_MessageBoxA)( __in_opt HWND hWnd, __in_opt LPCSTR lpText, __in_opt LPCSTR lpCaption, __in UINT uType); 然后用LoadLibraryA函数获取user32.dll的地址,再用GetProcAddress函数获取MessageBoxA在user32.dll中的地址,再把函数地址赋值给指针同时，user32.dll和MessageBoxA字符串也需要做处理最终代码:1234567891011121314151617#include &lt;stdio.h&gt;#include &lt;windows.h&gt;int entrymain()&#123; char szuser32[] = &#123;&apos;u&apos;,&apos;s&apos;,&apos;e&apos;,&apos;r&apos;,&apos;3&apos;,&apos;2&apos;,&apos;.&apos;,&apos;d&apos;,&apos;l&apos;,&apos;l&apos;,0&#125;; char szmessage[] = &#123;&apos;M&apos;,&apos;e&apos;,&apos;s&apos;,&apos;s&apos;,&apos;a&apos;,&apos;g&apos;,&apos;e&apos;,&apos;B&apos;,&apos;o&apos;,&apos;x&apos;,&apos;A&apos;,0&#125;; typedef int(WINAPI *FN_MessageBoxA)( __in_opt HWND hWnd, __in_opt LPCSTR lpText, __in_opt LPCSTR lpCaption, __in UINT uType); FN_MessageBoxA fn_MessageBoxA = (FN_MessageBoxA)GetProcAddress(LoadLibraryA(szuser32),szmessage); char he[] = &#123;&apos;h&apos;,&apos;e&apos;,&apos;l&apos;,&apos;l&apos;,&apos;o&apos;,0&#125;; char tip[] = &#123;&apos;t&apos;,&apos;i&apos;,&apos;p&apos;,&apos;s&apos;,0&#125;; fn_MessageBoxA(NULL,he,tip,MB_OK); return 0;&#125; 编译运行一下运行成功]]></content>
+      <categories>
+        <category>windows</category>
+      </categories>
+      <tags>
+        <tag>shellcode</tag>
+        <tag>溢出</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title><![CDATA[shellcode笔记(3)]]></title>
+    <url>%2F2019%2F04%2F12%2Fshellcode-3%2F</url>
+    <content type="text"><![CDATA[shellcode的编写原则ShelCode编写原则(规则更贴切)因为字符串直接赋值在内存中是一个绝对地址，存在于其它内存空间，shllcode在内存中运行时调用别的内存空间的地址可能会引起崩溃 杜绝双引号字符串的直接引用如:char buffer[] = “123456”;可用:char buffer[] = {‘1’,’2’,’3’,’4’,’5’,’6’,0};或者:12345678910111213char *buffer;_asm &#123; call _buffer _EMIT &apos;1&apos; :表占位，写入 _EMIT &apos;2&apos; _EMIT &apos;3&apos; _EMIT &apos;4&apos; _EMIT &apos;5&apos; _EMIT &apos;6&apos; _EMIT 0 :结束标志 _buffer: pop buffer &#125; 避免函数直接调用 因为不同的操作系统函数的地址也不一样，在编写shellcode时所调用的函数都是基于当前的操作系统和编译器所直接调用的函数，在其它操作系统平台上地址就会变化，所以需要动态调用函数 避免全局变量,避免使用static关键字 原因同1 所使用的每个函数都需先加载动态链接库 函数都存在于DLL(动态链接库)当中，在动态调用函数时都需要在内存中先加载动态链接库才能调用函数,如MessageBox函数存在于user32.dll中]]></content>
+      <categories>
+        <category>windows</category>
+      </categories>
+      <tags>
+        <tag>shellcode</tag>
+        <tag>溢出</tag>
+      </tags>
+  </entry>
+  <entry>
     <title><![CDATA[shellcode笔记(2)]]></title>
     <url>%2F2019%2F04%2F11%2Fshellcode-2%2F</url>
     <content type="text"><![CDATA[实际编写一个例子:123456789#include &quot;stdio.h&quot;#include &quot;string.h&quot;int main()&#123; char buffer[8]; gets(buffer); printf(&quot;%s&quot;,buffer); return 0;&#125; 可以看到我在程序中定义了一个缓冲区长度为8的buffer,把输入的数据放在buffer里面，然后打印出来,用OD附加看看输入16个a，长度远远大于我定义的8个字节看看会发生什么字符a的ascii码即是61,可以看到，程序暂停了，并报出了访问违规再看看EIP寄存器变成了61616161EIP寄存器存放了下一跳指令的地址，61616161不是一个地址，也不是一个指令，导致了程序的异常终止再看堆栈窗口的数据四个地址全部61占满,我输入了16个a,刚好16个字节的地址大小，此处因为我输入了超出缓存区大小的数据，溢出覆盖了EIP寄存器，如果我输入的是构造好的shellcode,那么我就能执行任意代码，甚至获取一个系统shell]]></content>
